@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sistema de Conferência de Split</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  </head>
+  <body>
+    <header class="topo">
+      <img src="gontijo.png" class="logo" />
+      <div class="titulo">
+        <h1>Sistema de Conferência de Split</h1>
+        <p>Ceopag • Cooperativa Gontijo</p>
+      </div>
+      <img src="ceopag.png" class="logo" />
+    </header>
+
+    <div class="acoes-topo">
+      <label class="botao-upload">
+        Escolher Extrato
+        <input type="file" id="inputExcel" accept=".xlsx,.xls" />
+      </label>
+
+      <button class="botao" onclick="exportarPDF()">Salvar em PDF</button>
+      <button class="botao secundario" onclick="abrirAjuda()">Ajuda</button>
+    </div>
+
+    <div id="alertaLimite" class="alerta" style="display: none">
+      ⚠ Atenção: O Split Utilizado ultrapassou o limite permitido de 90%.
+    </div>
+
+    <div id="erroArquivo" class="erro" style="display: none"></div>
+
+    <div id="areaPDF">
+      <div id="resultado" style="display: none">
+        <div class="card azul">
+          <h2>Análise Split</h2>
+          <p class="periodo" id="periodoSplit"></p>
+
+          <div class="linha">
+            <span>Liquidação POS</span>
+            <strong id="liquidacao"></strong>
+          </div>
+
+          <div class="linha">
+            <span>Limite (90%)</span>
+            <strong id="limite"></strong>
+          </div>
+
+          <div class="linha">
+            <span>Split Utilizado</span>
+            <strong id="split"></strong>
+          </div>
+
+          <div class="linha destaque">
+            <span>Saldo Disponível</span>
+            <strong id="saldo"></strong>
+          </div>
+        </div>
+
+        <div class="card laranja">
+          <h2>Análise Contábil</h2>
+          <p class="periodo" id="periodoContabil"></p>
+
+          <div class="linha">
+            <span
+              >Saldo Anterior (Saldo Inicial - Transferido para período
+              atual)</span
+            >
+            <strong id="saldoAnterior"></strong>
+          </div>
+
+          <div class="linha">
+            <span>Saldo Inicial + POS</span>
+            <strong id="saldoInicialMaisPOS"></strong>
+          </div>
+
+          <div class="linha">
+            <span>Split Utilizado</span>
+            <strong id="split2"></strong>
+          </div>
+
+          <div class="linha destaque">
+            <span>Valor Contábil Final</span>
+            <strong id="valorFinal"></strong>
+          </div>
+        </div>
+      </div>
+      <footer>
+        Sistema de Conferência de Split • Cooperativa Gontijo - Ceopag<br />
+        <span id="dataHoraGeracao"></span>
+      </footer>
+    </div>
+
+    <!-- MODAL AJUDA -->
+    <div id="modalAjuda" class="modal">
+      <div class="modal-conteudo">
+        <span class="fechar" onclick="fecharAjuda()">&times;</span>
+
+        <h2>Como gerar o seu extrato da conta Liquidante corretamente</h2>
+        <p>
+          Na seção da sua conta liquidante, clique em extrato, filtre o período
+          desejado, preferencialmente sempre do dia 1º até a data atual (do mês
+          vigente), clique em exportar para EXCEL.
+        </p>
+
+        <hr />
+
+        <h3>
+          COMO ENVIAR VALOR CONTÁBIL QUE SERÁ INFORMADO NA CONTA CORRENTE PARA
+          MEU CONTADOR (SE FOR O CASO)
+        </h3>
+        <p>
+          Na sua seção da conta CORRENTE, vá em extrato e faça o filtro do dia
+          1º até o último dia do mês vigente, clique em exportar para EXCEL.
+        </p>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
