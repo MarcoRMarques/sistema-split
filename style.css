@@ -1,18 +1,19 @@
 body {
-  font-family: "Segoe UI", sans-serif;
-  background: #f4f6f9;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f6f8;
   margin: 0;
   padding: 0;
-  color: #333;
 }
+
+/* HEADER */
 
 .topo {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 20px 40px;
+  align-items: center;
+  padding: 15px 30px;
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .logo {
@@ -29,126 +30,101 @@ body {
 }
 
 .titulo p {
-  margin: 4px 0 0 0;
-  font-size: 14px;
+  margin: 0;
   color: #666;
 }
 
-.upload-area {
-  text-align: center;
-  margin: 30px 0;
+/* AREA CENTRAL */
+
+#areaPDF {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-input[type="file"] {
-  padding: 8px;
-}
+/* MENUS */
 
-.card {
-  background: white;
-  margin: 20px auto;
-  width: 90%;
-  max-width: 800px;
+.menu-split,
+.menu-conta-corrente {
+  margin: 25px 0;
+  padding: 15px 20px;
   border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
 }
 
-.card h2 {
-  margin-top: 0;
+.menu-split {
+  background: #e8f5e9;
+  border-left: 6px solid #2e7d32;
 }
 
-.azul {
-  border-left: 6px solid #1f4e79;
+.menu-conta-corrente {
+  background: #fff3e0;
+  border-left: 6px solid #f57c00;
 }
 
-.laranja {
-  border-left: 6px solid #e26d2f;
-}
-
-.periodo {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 20px;
-}
-
-.linha {
+.menu-container {
   display: flex;
   justify-content: space-between;
-  margin: 10px 0;
-  font-size: 15px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.linha strong {
+.menu-botoes {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.menu-titulo-azul {
+  font-weight: bold;
+  color: #1b5e20;
   font-size: 16px;
 }
 
-.destaque {
-  margin-top: 20px;
-  padding-top: 10px;
-  border-top: 1px solid #eee;
+.menu-titulo-laranja {
   font-weight: bold;
+  color: #e65100;
+  font-size: 16px;
 }
 
-.alerta {
-  background: #ffe5e5;
-  color: #b30000;
-  padding: 15px;
-  margin: 20px auto;
-  width: 90%;
-  max-width: 800px;
-  border-left: 6px solid #b30000;
-  border-radius: 8px;
-  font-weight: bold;
-}
+/* BOTÕES */
 
-.erro {
-  background: #fff4e5;
-  color: #b36b00;
-  padding: 15px;
-  margin: 20px auto;
-  width: 90%;
-  max-width: 800px;
-  border-left: 6px solid #ff9900;
-  border-radius: 8px;
-  font-weight: bold;
-}
-
-.vermelho {
-  color: #b30000;
-}
-
-footer {
-  text-align: center;
-  margin: 40px 0 20px 0;
-  font-size: 13px;
-  color: #777;
-}
-
-.acoes-topo {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin: 30px 0;
-}
-
-.botao-upload {
-  background: #4caf50; /* verde claro moderno */
+.botao-upload-verde {
+  background: #4caf50;
   color: white;
-  padding: 10px 20px;
+  padding: 10px 18px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
   transition: 0.3s;
 }
 
-.botao-upload:hover {
-  background: #3e8e41;
+.botao-upload-verde:hover {
+  background: #388e3c;
 }
-.botao-upload input {
+
+.botao-upload-verde input {
   display: none;
 }
 
-.botao {
+.botao-upload-laranja {
+  background: #f57c00;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.botao-upload-laranja:hover {
+  background: #e65100;
+}
+
+.botao-upload-laranja input {
+  display: none;
+}
+
+.botao-azul {
   background: #1f4e79;
   color: white;
   border: none;
@@ -159,16 +135,95 @@ footer {
   transition: 0.3s;
 }
 
-.botao:hover {
+.botao-azul:hover {
   background: #163a59;
 }
 
-.secundario {
-  background: #666;
+.botao-cinza {
+  background: #757575;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
 }
 
-.secundario:hover {
-  background: #444;
+.botao-cinza:hover {
+  background: #424242;
+}
+
+/* ALERTA */
+
+.alerta {
+  padding: 12px 18px;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-weight: bold;
+}
+
+.erro {
+  padding: 12px 18px;
+  border-radius: 8px;
+  margin: 15px 0;
+  background: #ffe5e5;
+  color: #b30000;
+}
+
+/* CARDS */
+
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 14px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.card.azul {
+  border-left: 6px solid #1f4e79;
+}
+
+.card.laranja {
+  border-left: 6px solid #f57c00;
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+.periodo {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+/* LINHAS */
+
+.linha {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.linha strong {
+  font-weight: bold;
+}
+
+.linha.destaque {
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+  font-weight: bold;
+}
+
+/* RODAPÉ */
+
+footer {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 13px;
+  color: #666;
 }
 
 /* MODAL */

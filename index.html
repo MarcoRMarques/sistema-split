@@ -17,24 +17,33 @@
       <img src="ceopag.png" class="logo" />
     </header>
 
-    <div class="acoes-topo">
-      <label class="botao-upload">
-        Escolher Extrato
-        <input type="file" id="inputExcel" accept=".xlsx,.xls" />
-      </label>
-
-      <button class="botao" onclick="exportarPDF()">Salvar em PDF</button>
-      <button class="botao secundario" onclick="abrirAjuda()">Ajuda</button>
-    </div>
-
-    <div id="alertaLimite" class="alerta" style="display: none">
-      ⚠ Atenção: O Split Utilizado ultrapassou o limite permitido de 90%.
-    </div>
-
-    <div id="erroArquivo" class="erro" style="display: none"></div>
-
     <div id="areaPDF">
+      <!-- 🔵 MENU CONTA LIQUIDANTE -->
+      <div class="menu-split">
+        <div class="menu-container">
+          <span class="menu-titulo-azul">Extrato Conta Liquidante</span>
+
+          <div class="menu-botoes">
+            <label class="botao-upload-verde">
+              Selecionar Extrato da conta Liquidante
+              <input type="file" id="inputExcel" accept=".xlsx,.xls" />
+            </label>
+
+            <button class="botao-azul" onclick="exportarPDF()">
+              Salvar em PDF
+            </button>
+
+            <button class="botao-cinza" onclick="abrirAjuda()">Ajuda</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALERTA -->
+      <div id="alertaLimite" class="alerta" style="display: none"></div>
+      <div id="erroArquivo" class="erro" style="display: none"></div>
+
       <div id="resultado" style="display: none">
+        <!-- 🔵 CARD ANÁLISE SPLIT -->
         <div class="card azul">
           <h2>Análise Split</h2>
           <p class="periodo" id="periodoSplit"></p>
@@ -54,21 +63,38 @@
             <strong id="split"></strong>
           </div>
 
+          <div class="linha">
+            <span>Saldo conta liquidante</span>
+            <strong id="saldoLiquidante"></strong>
+          </div>
+
           <div class="linha destaque">
-            <span>Saldo Disponível</span>
+            <span>Saldo Disponível para Split</span>
             <strong id="saldo"></strong>
           </div>
         </div>
 
+        <!-- 🟠 MENU CONTA CORRENTE -->
+        <div class="menu-conta-corrente">
+          <div class="menu-container">
+            <span class="menu-titulo-laranja">Extrato Conta Corrente</span>
+
+            <label class="botao-upload-laranja">
+              Selecionar Extrato Conta Corrente
+              <input type="file" id="inputContaCorrente" accept=".xlsx,.xls" />
+            </label>
+          </div>
+        </div>
+
+        <!-- 🟠 CARD ANÁLISE CONTÁBIL -->
         <div class="card laranja">
           <h2>Análise Contábil</h2>
           <p class="periodo" id="periodoContabil"></p>
 
           <div class="linha">
-            <span
-              >Saldo Anterior (Saldo Inicial - Transferido para período
-              atual)</span
-            >
+            <span>
+              Saldo Anterior (Saldo Inicial - Transferido para período atual)
+            </span>
             <strong id="saldoAnterior"></strong>
           </div>
 
@@ -88,6 +114,8 @@
           </div>
         </div>
       </div>
+
+      <!-- RODAPÉ -->
       <footer>
         Sistema de Conferência de Split • Cooperativa Gontijo - Ceopag<br />
         <span id="dataHoraGeracao"></span>

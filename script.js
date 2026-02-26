@@ -1,6 +1,26 @@
+// =============================
+// EVENTOS
+// =============================
+
 document
   .getElementById("inputExcel")
   .addEventListener("change", handleFile, false);
+
+document
+  .getElementById("inputContaCorrente")
+  .addEventListener("change", handleFileContaCorrente, false);
+
+// =============================
+// UTILITÁRIAS
+// =============================
+
+function normalizarTexto(texto) {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
 
 function formatarMoeda(valor) {
   return valor.toLocaleString("pt-BR", {
@@ -19,7 +39,6 @@ function formatarData(data) {
 
 function converterDataBR(dataStr) {
   if (!dataStr) return null;
-
   if (dataStr instanceof Date) return dataStr;
 
   const partes = dataStr.toString().split("/");
@@ -30,7 +49,6 @@ function converterDataBR(dataStr) {
 
 function converterValorBR(valor) {
   if (valor === undefined || valor === null) return 0;
-
   if (typeof valor === "number") return valor;
 
   return (
@@ -45,6 +63,10 @@ function converterValorBR(valor) {
   );
 }
 
+// ==========================================================
+// 🔵 MÓDULO SPLIT (CONTA LIQUIDANTE)
+// ==========================================================
+
 function handleFile(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -55,36 +77,20 @@ function handleFile(e) {
     const data = new Uint8Array(event.target.result);
     const workbook = XLSX.read(data, { type: "array" });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
     const json = XLSX.utils.sheet_to_json(sheet, { raw: true });
 
-    // 🛡 VALIDAÇÃO DE ESTRUTURA
-    const colunasObrigatorias = ["Data", "Valor", "Tipo de transação"];
-    const cabecalho = Object.keys(json[0] || {});
-    const arquivoValido = colunasObrigatorias.every((col) =>
-      cabecalho.includes(col),
-    );
-
-    if (!json.length || !arquivoValido) {
-      document.getElementById("erroArquivo").innerText =
-        "Arquivo inválido. Certifique-se de enviar o EXTRATO exportado da sua conta Liquidante Ceopag.";
-      document.getElementById("erroArquivo").style.display = "block";
-      return;
-    } else {
-      document.getElementById("erroArquivo").style.display = "none";
-    }
-
-    processarDados(json);
+    processarSplit(json);
   };
 
   reader.readAsArrayBuffer(file);
 }
 
-function processarDados(dados) {
+function processarSplit(dados) {
   let datas = [];
   let liquidacaoPOS = 0;
   let splitUtilizado = 0;
   let saldoAnterior = 0;
+  let saldoLiquidanteFinal = 0;
 
   dados.forEach((linha) => {
     const data = converterDataBR(linha["Data"]);
@@ -94,38 +100,26 @@ function processarDados(dados) {
 
     if (data) datas.push(data);
 
-    if (tipo === "Crédito Recebível") {
-      liquidacaoPOS += valor;
-    }
+    if (tipo === "Crédito Recebível") liquidacaoPOS += valor;
 
-    if (tipo === "Débito Pix" || tipo === "Pagamento de Conta") {
+    if (tipo === "Débito Pix" || tipo === "Pagamento de Conta")
       splitUtilizado += valor;
-    }
 
-    if (cliente.includes("Saldo Inicial")) {
-      saldoAnterior += valor;
-    }
+    if (cliente.includes("Saldo Inicial")) saldoAnterior += valor;
+
+    if (cliente === "Saldo final do dia") saldoLiquidanteFinal = valor;
   });
 
   splitUtilizado = Math.abs(splitUtilizado);
-
-  if (datas.length === 0) {
-    alert("Não foi possível identificar datas válidas.");
-    return;
-  }
 
   const dataInicial = new Date(Math.min(...datas));
   const dataFinal = new Date(Math.max(...datas));
 
   const limiteSplit = liquidacaoPOS * 0.9;
   const saldoDisponivel = limiteSplit - splitUtilizado;
-
   const saldoInicialMaisPOS = saldoAnterior + liquidacaoPOS;
   const valorFinal = saldoInicialMaisPOS - splitUtilizado;
-
-  const percLimite = liquidacaoPOS === 0 ? 0 : limiteSplit / liquidacaoPOS;
   const percSplit = liquidacaoPOS === 0 ? 0 : splitUtilizado / liquidacaoPOS;
-  const percSaldo = liquidacaoPOS === 0 ? 0 : saldoDisponivel / liquidacaoPOS;
 
   document.getElementById("periodoSplit").innerText =
     formatarData(dataInicial) + " até " + formatarData(dataFinal);
@@ -137,13 +131,12 @@ function processarDados(dados) {
     formatarMoeda(liquidacaoPOS);
 
   document.getElementById("limite").innerText =
-    formatarMoeda(limiteSplit) + " | " + formatarPercentual(percLimite);
+    formatarMoeda(limiteSplit) + " | 90,00%";
 
   document.getElementById("split").innerText =
     formatarMoeda(splitUtilizado) + " | " + formatarPercentual(percSplit);
 
-  document.getElementById("saldo").innerText =
-    formatarMoeda(saldoDisponivel) + " | " + formatarPercentual(percSaldo);
+  document.getElementById("saldo").innerText = formatarMoeda(saldoDisponivel);
 
   document.getElementById("saldoAnterior").innerText =
     formatarMoeda(saldoAnterior);
@@ -155,48 +148,146 @@ function processarDados(dados) {
 
   document.getElementById("valorFinal").innerText = formatarMoeda(valorFinal);
 
-  // 🔴 ALERTA DE LIMITE
-  if (splitUtilizado > limiteSplit) {
-    document.getElementById("alertaLimite").style.display = "block";
-    document.getElementById("split").classList.add("vermelho");
-    document.getElementById("saldo").classList.add("vermelho");
-  } else {
-    document.getElementById("alertaLimite").style.display = "none";
-  }
-
-  // 🕒 DATA E HORA
-  const agora = new Date();
-  const dataHoraFormatada =
-    agora.toLocaleDateString("pt-BR") +
-    " às " +
-    agora.toLocaleTimeString("pt-BR");
-
-  document.getElementById("dataHoraGeracao").innerText =
-    "Cálculo realizado em: " + dataHoraFormatada;
+  document.getElementById("saldoLiquidante").innerText =
+    formatarMoeda(saldoLiquidanteFinal);
 
   document.getElementById("resultado").style.display = "block";
 }
 
-// 📄 EXPORTAR PDF
-function exportarPDF() {
-  const elemento = document.getElementById("areaPDF");
+// ==========================================================
+// 🟠 MÓDULO CONTA CORRENTE
+// ==========================================================
+
+function handleFileContaCorrente(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function (event) {
+    const data = new Uint8Array(event.target.result);
+    const workbook = XLSX.read(data, { type: "array" });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(sheet, { raw: true });
+
+    processarContaCorrente(json);
+    e.target.value = "";
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
+function processarContaCorrente(dados) {
+  let totalEntradas = 0;
+  let totalSaidas = 0;
+  let totalPixTotal = 0;
+  let totalPixMesmaTitularidade = 0;
+  let totalPixFornecedores = 0;
+  let datas = [];
+
+  dados.forEach((linha) => {
+    const data = converterDataBR(linha["Data"]);
+    const valor = converterValorBR(linha["Valor"]);
+    const tipo = (linha["Tipo de transação"] || "").trim();
+    const cliente = (linha["Cliente"] || "").trim();
+    const descricao = (linha["Descrição"] || "").trim();
+
+    if (data) datas.push(data);
+
+    if (cliente === "Saldo final do dia") return;
+
+    if (tipo === "Crédito Transferência entre contas") {
+      totalEntradas += valor;
+      return;
+    }
+
+    totalSaidas += Math.abs(valor);
+
+    if (tipo === "Débito Pix") {
+      totalPixTotal += Math.abs(valor);
+
+      if (descricao.toLowerCase().includes("pix realizado para")) {
+        const nomeDestino = descricao.replace(/pix realizado para/i, "").trim();
+
+        if (normalizarTexto(nomeDestino) === normalizarTexto(cliente)) {
+          totalPixMesmaTitularidade += Math.abs(valor);
+        } else {
+          totalPixFornecedores += Math.abs(valor);
+        }
+      }
+    }
+  });
+
+  const dataInicial = new Date(Math.min(...datas));
+  const dataFinal = new Date(Math.max(...datas));
+
+  gerarPDFContaCorrente(
+    totalEntradas,
+    totalSaidas,
+    totalPixTotal,
+    totalPixMesmaTitularidade,
+    totalPixFornecedores,
+    dataInicial,
+    dataFinal,
+  );
+}
+
+function gerarPDFContaCorrente(
+  totalEntradas,
+  totalSaidas,
+  totalPixTotal,
+  totalPixMesmaTitularidade,
+  totalPixFornecedores,
+  dataInicial,
+  dataFinal,
+) {
+  const agora = new Date();
+  const dataHora =
+    agora.toLocaleDateString("pt-BR") +
+    " às " +
+    agora.toLocaleTimeString("pt-BR");
+
+  const conteudo = `
+    <div style="font-family: Arial; padding: 30px;">
+      <h2 style="text-align:center;">Relatório Conta Corrente</h2>
+      <p><strong>Período:</strong> ${formatarData(dataInicial)} até ${formatarData(dataFinal)}</p>
+      <hr/>
+
+      <p><strong>Total de entradas no período</strong></p>
+      <p style="font-size:20px; color:#1f4e79;">${formatarMoeda(totalEntradas)}</p>
+
+      <p><strong>Total de saídas no período</strong></p>
+      <p style="font-size:20px; color:#b30000;">${formatarMoeda(totalSaidas)}</p>
+
+      <p><strong>Total Pix realizado</strong></p>
+      <p>${formatarMoeda(totalPixTotal)}</p>
+
+      <div style="margin-left:20px;">
+        <p>Débito Pix mesma titularidade (retirada)</p>
+        <p>${formatarMoeda(totalPixMesmaTitularidade)}</p>
+
+        <p>Transferência Pix para Fornecedores</p>
+        <p>${formatarMoeda(totalPixFornecedores)}</p>
+      </div>
+
+      <hr style="margin-top:40px;"/>
+      <p style="text-align:center; font-size:12px;">
+        Sistema de Conferência de Split • Cooperativa Gontijo - Ceopag<br/>
+        Cálculo realizado em: ${dataHora}
+      </p>
+    </div>
+  `;
+
+  const elemento = document.createElement("div");
+  elemento.innerHTML = conteudo;
 
   html2pdf()
     .set({
       margin: 10,
-      filename: "Conferencia_Split.pdf",
+      filename: "Relatorio_Conta_Corrente.pdf",
       html2canvas: { scale: 2 },
       jsPDF: { orientation: "portrait" },
     })
     .from(elemento)
     .save();
-}
-
-// ❓ AJUDA
-function abrirAjuda() {
-  document.getElementById("modalAjuda").style.display = "block";
-}
-
-function fecharAjuda() {
-  document.getElementById("modalAjuda").style.display = "none";
 }
