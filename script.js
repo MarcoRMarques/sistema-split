@@ -291,3 +291,14 @@ function gerarPDFContaCorrente(
     .from(elemento)
     .save();
 }
+// =============================
+// MODAL AJUDA
+// =============================
+
+function abrirAjuda() {
+  document.getElementById("modalAjuda").style.display = "block";
+}
+
+function fecharAjuda() {
+  document.getElementById("modalAjuda").style.display = "none";
+}
