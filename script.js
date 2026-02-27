@@ -121,6 +121,42 @@ function processarSplit(dados) {
   const valorFinal = saldoInicialMaisPOS - splitUtilizado;
   const percSplit = liquidacaoPOS === 0 ? 0 : splitUtilizado / liquidacaoPOS;
 
+  // 🎯 REGRA INTELIGENTE DE ALERTA
+
+  const percentualUtilizado = percSplit * 100;
+  const percentualArredondado = Math.round(percentualUtilizado * 10) / 10;
+
+  const alerta = document.getElementById("alertaLimite");
+
+  if (alerta) {
+    alerta.style.display = "block";
+
+    document.getElementById("split").classList.remove("vermelho");
+    document.getElementById("saldo").classList.remove("vermelho");
+
+    if (percentualArredondado >= 90.1) {
+      alerta.innerHTML =
+        "⚠ Atenção: O Split Utilizado ultrapassou o limite permitido de 90%.";
+      alerta.style.background = "#ffe5e5";
+      alerta.style.color = "#b30000";
+
+      document.getElementById("split").classList.add("vermelho");
+      document.getElementById("saldo").classList.add("vermelho");
+    } else if (percentualArredondado === 90.0) {
+      alerta.innerHTML =
+        "✔ Parabéns! Seu Split está dentro do limite permitido.";
+      alerta.style.background = "#e6f4ea";
+      alerta.style.color = "#1e7e34";
+    } else {
+      alerta.innerHTML =
+        "✔ Você ainda possui saldo disponível para realizar seu Split.";
+      alerta.style.background = "#e6f4ea";
+      alerta.style.color = "#1e7e34";
+    }
+  }
+
+  // EXIBIÇÃO
+
   document.getElementById("periodoSplit").innerText =
     formatarData(dataInicial) + " até " + formatarData(dataFinal);
 
@@ -193,7 +229,6 @@ function processarContaCorrente(dados) {
     const descricao = (linha["Descrição"] || "").trim();
 
     if (data) datas.push(data);
-
     if (cliente === "Saldo final do dia") return;
 
     if (tipo === "Crédito Transferência entre contas") {
@@ -249,7 +284,7 @@ function gerarPDFContaCorrente(
 
   const conteudo = `
     <div style="font-family: Arial; padding: 30px;">
-      <h2 style="text-align:center;">Relatório Conta Corrente</h2>
+      <h2 style="text-align:center;">Relatório controle Contábil Conta Corrente</h2>
       <p><strong>Período:</strong> ${formatarData(dataInicial)} até ${formatarData(dataFinal)}</p>
       <hr/>
 
@@ -266,7 +301,7 @@ function gerarPDFContaCorrente(
         <p>Débito Pix mesma titularidade (retirada)</p>
         <p>${formatarMoeda(totalPixMesmaTitularidade)}</p>
 
-        <p>Transferência Pix para Fornecedores</p>
+        <p>Transferência Pix para Terceiros</p>
         <p>${formatarMoeda(totalPixFornecedores)}</p>
       </div>
 
@@ -284,13 +319,14 @@ function gerarPDFContaCorrente(
   html2pdf()
     .set({
       margin: 10,
-      filename: "Relatorio_Conta_Corrente.pdf",
+      filename: "Relatorio_Controle_Contabil_Conta_Corrente.pdf",
       html2canvas: { scale: 2 },
       jsPDF: { orientation: "portrait" },
     })
     .from(elemento)
     .save();
 }
+
 // =============================
 // MODAL AJUDA
 // =============================
